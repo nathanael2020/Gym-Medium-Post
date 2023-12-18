@@ -20,9 +20,9 @@ class SimpleDrivingEnv(gym.Env):
             high=np.array([10, 10, 1, 1, 5, 5, 10, 10], dtype=np.float32))
         self.np_random, _ = gym.utils.seeding.np_random()
 
-        self.client = p.connect(p.DIRECT)
+        self.client = p.connect(p.GUI)
         # Reduce length of episodes for RL algorithms
-        p.setTimeStep(1/30, self.client)
+        p.setTimeStep(1/180, self.client)
 
         self.car = None
         self.goal = None
@@ -68,10 +68,10 @@ class SimpleDrivingEnv(gym.Env):
         self.car = Car(self.client)
 
         # Set the goal to a random target
-        x = (self.np_random.uniform(5, 9) if self.np_random.randint(2) else
-             self.np_random.uniform(-5, -9))
-        y = (self.np_random.uniform(5, 9) if self.np_random.randint(2) else
-             self.np_random.uniform(-5, -9))
+        x = (self.np_random.uniform(5, 9) if self.np_random.integers(0,2) else
+             self.np_random.uniform(-9, -5))
+        y = (self.np_random.uniform(5, 9) if self.np_random.integers(0,2) else
+             self.np_random.uniform(-9, -5))
         self.goal = (x, y)
         self.done = False
 
@@ -86,29 +86,31 @@ class SimpleDrivingEnv(gym.Env):
         return np.array(car_ob + self.goal, dtype=np.float32)
 
     def render(self, mode='human'):
-        if self.rendered_img is None:
-            self.rendered_img = plt.imshow(np.zeros((100, 100, 4)))
+        # if self.rendered_img is None:
+        #     self.rendered_img = plt.imshow(np.zeros((100, 100, 4)))
+        #
+        # # Base information
+        # car_id, client_id = self.car.get_ids()
+        # proj_matrix = p.computeProjectionMatrixFOV(fov=80, aspect=1,
+        #                                            nearVal=0.01, farVal=100)
+        # pos, ori = [list(l) for l in
+        #             p.getBasePositionAndOrientation(car_id, client_id)]
+        # pos[2] = 0.2
+        #
+        # # Rotate camera direction
+        # rot_mat = np.array(p.getMatrixFromQuaternion(ori)).reshape(3, 3)
+        # camera_vec = np.matmul(rot_mat, [1, 0, 0])
+        # up_vec = np.matmul(rot_mat, np.array([0, 0, 1]))
+        # view_matrix = p.computeViewMatrix(pos, pos + camera_vec, up_vec)
+        #
+        # # Display image
+        # frame = p.getCameraImage(100, 100, view_matrix, proj_matrix)[2]
+        # frame = np.reshape(frame, (100, 100, 4))
+        # self.rendered_img.set_data(frame)
+        # plt.draw()
+        # plt.pause(.00001)
 
-        # Base information
-        car_id, client_id = self.car.get_ids()
-        proj_matrix = p.computeProjectionMatrixFOV(fov=80, aspect=1,
-                                                   nearVal=0.01, farVal=100)
-        pos, ori = [list(l) for l in
-                    p.getBasePositionAndOrientation(car_id, client_id)]
-        pos[2] = 0.2
-
-        # Rotate camera direction
-        rot_mat = np.array(p.getMatrixFromQuaternion(ori)).reshape(3, 3)
-        camera_vec = np.matmul(rot_mat, [1, 0, 0])
-        up_vec = np.matmul(rot_mat, np.array([0, 0, 1]))
-        view_matrix = p.computeViewMatrix(pos, pos + camera_vec, up_vec)
-
-        # Display image
-        frame = p.getCameraImage(100, 100, view_matrix, proj_matrix)[2]
-        frame = np.reshape(frame, (100, 100, 4))
-        self.rendered_img.set_data(frame)
-        plt.draw()
-        plt.pause(.00001)
+        pass
 
     def close(self):
         p.disconnect(self.client)

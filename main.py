@@ -11,8 +11,8 @@ def main():
     agent = TRPOAgent(policy=nn)
 
     agent.load_model("agent.pth")
-    agent.train("SimpleDriving-v0", seed=0, batch_size=5000, iterations=100,
-                max_episode_length=250, verbose=True)
+#    agent.train("SimpleDriving-v0", seed=0, batch_size=5000, iterations=4,
+#                max_episode_length=250, verbose=True)
     agent.save_model("agent.pth")
 
     env = gym.make('SimpleDriving-v0')
@@ -23,7 +23,7 @@ def main():
         env.render()
         if done:
             ob = env.reset()
-            time.sleep(1/30)
+            time.sleep(1/180)
 
 
 if __name__ == '__main__':
